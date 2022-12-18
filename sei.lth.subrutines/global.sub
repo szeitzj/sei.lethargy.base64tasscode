@@ -1,0 +1,113 @@
+NextFadeInIrq
+    ldx RasterPointersCounterFadeIn
+    lda RasterPointersFadeIn	+ $00,x
+    cmp #$ff
+    bne +
+        ldx #$00
+        stx RasterPointersCounterFadeIn
+    +
+    lda RasterPointersFadeIn	+ $00,x
+    sta RasterIrqSubroutineline + $06       ; Rasterline 8.bit
+    lda RasterPointersFadeIn	+ $01,x
+    sta RasterIrqSubroutineline + $0b       ; Rasterline 0-7.bit
+    lda RasterPointersFadeIn  + $02,x
+    sta RasterIrqSubroutine		+ $01       ; Irq Rutin low byte
+    lda RasterPointersFadeIn	+ $03,x
+    sta RasterIrqSubroutine 	+ $02       ; Irq Rutin hi byte
+    inx
+    inx
+    inx
+    inx
+    stx RasterPointersCounterFadeIn
+	rts
+
+ProgramCodeInit
+    sei
+
+	.if LINKING = 0	
+		lda #$7f
+		sta $dc0d
+		sta $dd0d
+		lda $dc0d
+		lda $dd0d
+		lda #$01
+		sta $d01a
+		lda #$35
+		sta $01
+		lda #$00
+		tax
+		tay
+		jsr InitMusic
+	.endif
+
+	lda $d011
+	and #%01111111
+	sta $d011
+	ldx RasterPointersCounterFadeIn
+	lda RasterPointersFadeIn  	+ $00,x			; Rasterline above $ff?
+	ora $d011
+	sta $d011
+
+	lda RasterPointersFadeIn  	+ $01,x			; set Rasterline
+	sta $d012
+	lda RasterPointersFadeIn 	+ $02,x
+	sta RasterIrqSubroutine + $01
+	lda RasterPointersFadeIn 	+ $03,x
+	sta RasterIrqSubroutine + $02
+
+	lda #<RasterIrqRoutine
+	sta $fffe
+	lda #>RasterIrqRoutine
+	sta $ffff
+	cli
+
+	PARTExit
+		jmp PARTExit
+		.if LINKING = 1
+			sei
+			lda	#$00
+			ldx	#>PlayMusic
+			ldy	#<PlayMusic
+			jsr	Sparkle_InstallIrq
+			#SetBits $d011,$0b
+			#SetBits $d015,$00
+			#SetBits $d020,$00
+			#SetBits $d021,$00
+			cli
+			; launch next part (move jump-address $xxxx-1 to the stack)
+			lda	#$03
+			pha
+			lda	#$ff
+			pha
+			jmp	Sparkle_LoadNext
+		.else
+			; reset
+			sei
+			#SetBits $01,$37
+			jmp	$fce2
+		.endif
+	rts
+
+ProgramCodeIrqControll
+    RasterIrqRoutine
+	sta $a0
+	stx $a1
+	sty $a2
+
+	RasterIrqSubroutine
+	jsr $0000
+
+	RasterIrqSubroutineline
+	lda $d011
+	and #%01111111
+	ora #$00			; RasterIrqSubroutineline + $06 byte
+	sta $d011
+	lda #$00			; RasterIrqSubroutineline + $0b byte
+	sta $d012
+
+	lsr $d019
+
+	lda $a0
+	ldx $a1
+	ldy $a2
+	rti

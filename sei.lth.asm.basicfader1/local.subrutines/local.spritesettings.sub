@@ -1,0 +1,37 @@
+SpriteSettings
+    .comment
+        $d000 - sprite x coordinate register (és a többiek sorban)
+        $d010 - sprite x extra coordinate register
+        $d015 - sprite eneble register
+        $d017 - sprite double height register
+        $d01b - sprite priority register
+        $d01c - sprite multicolor mode register
+        $d01d - sprite double width register
+        $d027 - sprite 0 color (és a többiek sorban)
+    .endc
+
+    lda #$00
+    tax
+    -   sta $d000,x
+        inx
+        cpx #$0f
+    bne -
+
+    ;lda #$00 - örökölt $00 érték az előző ciklusból
+    sta $d010
+    sta $d015
+    sta $d01b
+    sta $d01c
+    sta $d01d
+
+    ;lda #$00 - örökölt $00 érték az előző ciklusból
+    tax
+    -   sta $d027,x
+        inx
+        cpx #$08
+    bne -
+
+    lda #$ff
+    sta $d017       ; minden sprite függőlegesen nyújtott
+
+    rts

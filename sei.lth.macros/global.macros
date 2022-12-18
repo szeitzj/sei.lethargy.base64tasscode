@@ -1,0 +1,51 @@
+ClearScreen .macro MacroCharacter, MacroColor 
+
+    ldx #$ff-$fa
+    lda #\MacroCharacter
+    -
+        sta ScreenMemory - $ff + $fa + $00 * $fa,x
+        sta ScreenMemory - $ff + $fa + $01 * $fa,x
+        sta ScreenMemory - $ff + $fa + $02 * $fa,x
+        sta ScreenMemory - $ff + $fa + $03 * $fa,x
+        inx
+    bne -
+    
+    ldx #$ff-$fa
+    lda #\MacroColor
+    -
+        sta ColorMemory - $ff + $fa + $00 * $fa,x
+        sta ColorMemory - $ff + $fa + $01 * $fa,x
+        sta ColorMemory - $ff + $fa + $02 * $fa,x
+        sta ColorMemory - $ff + $fa + $03 * $fa,x
+        inx
+    bne -
+
+    .comment
+        a ScreenMemory memóriacímtől 1000 byte-ot feltölt MacroCharacter-rel
+        a ColorMemory memóriacímtől 1000 byte-ot feltölt MacroColor értékkel
+    .endc
+.endm
+
+ClearBits .macro MemoryAddress, Byte
+    lda \MemoryAddress
+    and #~\Byte
+    sta \MemoryAddress
+.endm
+
+IncWord .macro MemoryAddress
+    inc \MemoryAddress
+    bne +
+        inc \MemoryAddress + $01
+    +
+.endm
+
+MergeBits .macro MemoryAddress, Byte
+    lda \MemoryAddress
+    ora #\Byte
+    sta \MemoryAddress
+.endm
+
+SetBits .macro MemoryAddress, Byte
+    lda #\Byte
+    sta \MemoryAddress
+.endm

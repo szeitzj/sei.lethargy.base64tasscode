@@ -1,0 +1,17 @@
+StageFadeIn_01
+    .if ShowRasterTime
+        lda $d020
+        sta $ff
+        #SetBits $d020, Yellow
+    .fi
+
+    jsr PlayMusic
+    #IncWord FrameCounter
+    jsr NextFadeInIrq
+
+    .if ShowRasterTime
+        lda $ff
+        sta $d020
+        ;#SetBits $d020, Black
+    .fi
+    rts

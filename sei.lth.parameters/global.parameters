@@ -1,0 +1,30 @@
+; 64TASS környezeti beállítások
+    .cpu "6502"
+    .enc "screen"
+    .weak
+        LINKING = 0
+    .endweak
+
+; VIC-II beállítások
+    ColorMemory     = $d800
+    ScreenMemory    = (%11 - VicBankPointer) * $4000 + $0400 * ScreenMemoryPointer
+
+    Black			= $00
+    White			= $01
+    Red				= $02
+    Cyan			= $03
+    Purple			= $04
+    Green			= $05
+    Blue			= $06
+    Yellow			= $07
+    Orange			= $08
+    Brown			= $09
+    Lightred		= $0a
+    Darkgrey		= $0b
+    Grey			= $0c
+    Lightgreen		= $0d
+    Lightblue		= $0e
+    Lightgrey		= $0f
+
+; Változók
+    FrameCounter    .byte $00, $00
